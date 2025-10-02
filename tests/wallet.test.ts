@@ -189,7 +189,33 @@ describe("Testing claim", () => {
     recipient: beneficiary,
   });
   });
+  it("Does not allow beneficiary to claim the balance before the block-height is reached", () => {
+    const deployer = accounts.get("deployer")!;
+    const beneficiary = accounts.get("wallet_1")!;
+    const targetBlockHeight = 10;
+    const amount = 10;
+
+      const lockResponse = simnet.callPublicFn(
+    "wallet",
+    "lock",
+    [Cl.principal(beneficiary), Cl.uint(10), Cl.uint(10)],
+    deployer
+      );
+
+     simnet.mineEmptyBlocks(targetBlockHeight - 8);
+
+  const claimResponse = simnet.callPublicFn(
+    "wallet",
+    "claim",
+    [], 
+    beneficiary
+  );
+
+  expect(claimResponse.result).toBeErr(Cl.uint(105));
+  expect(claimResponse.events).toHaveLength(0);
+
   
+  });
 });
 
 
